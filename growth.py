@@ -3,47 +3,45 @@ import pandas as pd
 import os
 from io import BytesIO
 
-# Set the page config
 st.set_page_config(page_title="Data Sweeper", layout='wide')
 
-# Custom CSS
+# custom css
 st.markdown(
     """
     <style>
-    .stApp{
-    background-color: black;
-    color: white;
+    .stApp {
+        background-color: black;
+        color: white;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# Title and description
-st.title("💿 DataSweeper Sterling Integrator By Saba Muhammad Riaz")
+# title and description
+st.title("💿 Datasweeper Sterling Integrator By Saba Muhammad Riaz")
 st.write("Transform your files between CSV and Excel formats with built-in data cleaning")
 
-# File uploader
+# file uploader
 uploaded_files = st.file_uploader("Upload your files (accepts CSV or Excel):", type=["csv", "xlsx"], accept_multiple_files=True)
 
 if uploaded_files:
     for file in uploaded_files:
         file_ext = os.path.splitext(file.name)[-1].lower()
 
-        # Read file based on extension
         if file_ext == ".csv":
             df = pd.read_csv(file)
         elif file_ext == ".xlsx":
             df = pd.read_excel(file)
         else:
             st.error(f"Unsupported file type: {file_ext}")
-            continue
+            continue  # Skip unsupported file types
 
-        # Display the dataframe preview
+        # file data
         st.write("🔍 Preview the head of the Dataframe")
         st.dataframe(df.head())
 
-        # Data cleaning options
+        # data cleaning option
         st.subheader("🛠️ Data Cleaning Options")
         if st.checkbox(f"Clean data for {file.name}"):
             col1, col2 = st.columns(2)
@@ -59,19 +57,17 @@ if uploaded_files:
                     df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].mean())
                     st.write("☑️ Missing values have been filled")
 
-            # Select columns to keep
             st.subheader("💠 Select Columns to Keep")
             columns = st.multiselect(f"Choose columns for {file.name}", df.columns, default=df.columns)
             df = df[columns]
 
-            # Data visualization
+            # Data Visualization
             st.subheader("📊 Data Visualization")
             st.bar_chart(df.select_dtypes(include='number').iloc[:, :2])
 
-            # Conversion options
+            # Conversion Options
             st.subheader("🔄 Conversion Option")
             conversion_type = st.radio(f"Convert {file.name} to:", ["CSV", "Excel"], key=file.name)
-
             if st.button(f"Convert {file.name}"):
                 buffer = BytesIO()
                 if conversion_type == "CSV":
@@ -82,7 +78,6 @@ if uploaded_files:
                     df.to_excel(buffer, index=False)
                     file_name = file.name.replace(file_ext, ".xlsx")
                     mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-
                 buffer.seek(0)
 
                 st.download_button(
@@ -93,3 +88,4 @@ if uploaded_files:
                 )
 
         st.success("🎉 All files processed successfully!")
+
